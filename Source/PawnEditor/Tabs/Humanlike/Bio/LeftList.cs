@@ -98,8 +98,8 @@ public partial class TabWorker_Bio_Humanlike
         if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) Find.WindowStack.Add(new ListingMenu_Abilities(pawn));
 
         var abilities = (from a in pawn.abilities.abilities
-            orderby a.def.level, a.def.EntropyGain
-            select a).ToList();
+                         orderby a.def.level, a.def.EntropyGain
+                         select a).ToList();
         var abilitiesRect = viewRect.TakeTopPart(abilitiesLastHeight + 14).ContractedBy(6);
         if (abilities.Count == 0)
         {
@@ -145,13 +145,18 @@ public partial class TabWorker_Bio_Humanlike
         colorRect.xMin += 6f;
         string label = "PawnEditor.FavColor".Translate();
         using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(colorRect.TakeLeftPart(Text.CalcSize(label).x + 4), label);
-        Widgets.DrawBoxSolid(colorRect.TakeRightPart(30).ContractedBy(2.5f), pawn.story.favoriteColor?.color ?? Color.white);
+        Widgets.DrawBoxSolid(colorRect.TakeRightPart(30).ContractedBy(2.5f), pawn.story?.favoriteColor?.color ?? Color.white);
         if (Widgets.ButtonText(colorRect, "PawnEditor.PickColor".Translate()))
         {
             var currentColor = pawn.story.favoriteColor?.color ?? Color.white;
-            Find.WindowStack.Add(new Dialog_ColorPicker(color => pawn.story.favoriteColor.color = color, DefDatabase<ColorDef>.AllDefs
-                   .Select(cd => cd.color)
-                   .ToList(),
+            Find.WindowStack.Add(new Dialog_ColorPicker(
+                newColor =>
+                {
+                    // Find the ColorDef in the game's database that matches the chosen color
+                    // and assign it to the pawn's story tracker.
+                    pawn.story.favoriteColor = DefDatabase<ColorDef>.AllDefs.FirstOrDefault(def => def.color == newColor);
+                },
+                DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList(),
                 currentColor));
         }
 
